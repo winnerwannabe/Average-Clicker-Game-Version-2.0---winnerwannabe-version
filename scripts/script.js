@@ -9,10 +9,11 @@ var mult            = 1;
 var cps             = 0;
 var level           = 1;
 var nextLevelReward = 200
-var xp              = 1000;
+var xp              = 0;
 var neededXP        = 20;
 var shortenNumbers  = true;
 var alerts          = false;
+var multi           = 1;
 
 
 // non important vars
@@ -215,6 +216,7 @@ function reset() {
 		level = 1;
 		nextLevelReward = 200;
 		xp = 0;
+    multi = 1;
 		neededXP = 20;
         updates = [];
         achievements = [];
@@ -224,10 +226,28 @@ function reset() {
         window.location.reload();
 	}
 }
+
+function prestege() {
+  allTimeClicks = 0;
+  bucks = 300;
+  mult = 1;
+  cps = 0;
+  level = 1;
+  nextLevelReward = 200;
+  xp = 0;
+  neededXP = 20;
+      updates = [];
+      
+  save();
+
+      window.location.reload();
+}
+
 function save() {
 	localStorage.setItem("atc",allTimeClicks)
 	localStorage.setItem("bucks",bucks)
 	localStorage.setItem("mult",mult)
+	localStorage.setItem("multi",multi)
 	localStorage.setItem("cps",cps)
 	localStorage.setItem("level",level)
 	localStorage.setItem("nlr",nextLevelReward)
@@ -316,6 +336,9 @@ function update() {
 	document.getElementById('needed-xp').innerHTML = getNum(neededXP);
 	
 	var percent = Math.round((xp/neededXP)*100);
+  if (percent>100){
+    percent=100
+  }
 	document.getElementById('xp-var-value').style.width = percent+'%';
 
 	updateUpgradeAvailability()
@@ -359,20 +382,37 @@ function removeAlerts() {
 }
 
 function clickActions() {
-	xp += mult;
-	allTimeClicks += mult;
+	xp += Math.round(mult*multi);
+	allTimeClicks += Math.round(mult*multi);
 	if (xp >= neededXP) {
 		nextLevel();
 	}
 	update();
 }
 
+/*function factorial(a) {
+  if (0 == n || 1 == n) {
+    
+  }
+}
+*/
 function nextLevel() {
-	level ++;
-	xp -= neededXP;
-	bucks += nextLevelReward;
-	nextLevelReward = Math.round(nextLevelReward+((100*level)*(rewardRate)));
-	neededXP = Math.round(neededXP+((100*level)*xpRate));
+/*  if (xp>=neededXP) {
+    
+  }*/
+  while (xp >= neededXP) {
+	  level ++;
+  	xp -= neededXP;
+  	bucks += nextLevelReward;
+  	nextLevelReward = Math.round(nextLevelReward+((100*level)*(rewardRate)));
+  	neededXP = Math.round(neededXP+((100*level)*xpRate)); //does not work as intended from lvl 1 should go to 215 but goes to 410
+    update();
+    if (level >= 1000000000) {
+      alert("you will be reset now to avoid permanently breaking your game. you will now be forced to prestege. you will get a multiplyer.")
+      prestege()
+      multi += 0.1
+    }
+  }
 }
 
 
@@ -421,17 +461,10 @@ setInterval(()=>{
 }, 5000)
 
 setInterval(()=>{
-	allTimeClicks += cps;
-	xp += cps;
+	allTimeClicks += Math.round(cps*multi);
+	xp += Math.round(cps*multi);
 	if (xp >= neededXP) {
 		nextLevel();
 	} 
 	update();
 }, 600)
-
-setInterval(()=>{
-	if (xp >= neededXP) {
-		nextLevel();
-    update();
-	} 
-}, 60)
